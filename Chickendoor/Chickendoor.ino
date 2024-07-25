@@ -1,6 +1,6 @@
 // Pinnummers voor knoppen en motor
 const int ENA_PIN = 9; // the Arduino pin connected to the EN1 pin L298N
-const int IN1_PIN = 6; // the Arduino pin connected to the IN1 pin L298N
+const int IN1_PIN = 6; // the Arduino pin connected to the IN1 pin L298N.
 const int IN2_PIN = 5; // the Arduino pin connected to the IN2 pin L298N.
 
 const int openButtonPin = 3; // Aanpassen naar het juiste pinnummer voor de openknop
