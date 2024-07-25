@@ -62,7 +62,7 @@ void loop() {
         // Motor is gestopt, controleer opnieuw of er een object wordt gedetecteerd
         int ir_sensor_state = digitalRead(sensorButtonPin);
         if (ir_sensor_state == HIGH) {
-            // Object niet gedetecteerd, hervat de motor
+            // Object niet gedetecteerd, hervat de motor.
             motor_running = true;
             motor_start_time = millis();
             //digitalWrite(motor_pin, HIGH);
