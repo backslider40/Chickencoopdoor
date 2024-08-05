@@ -12,6 +12,15 @@ unsigned long motor_start_time = 0;
 unsigned long motor_duration = 20; // Motor loopt initieel 20 seconden
 unsigned long remaining_motor_duration = 0; // Resterende tijd van de motor
 
+// Create servo object for motor
+Servo motor;
+
+// Variable to track button state
+bool buttonPressed = false;
+
+// Variable to track infrared sensor state
+bool objectDetected = false;
+
 void setup() {
   pinMode(ENA_PIN, OUTPUT);
   pinMode(IN1_PIN, OUTPUT);
@@ -33,40 +42,28 @@ void loop() {
         // Knop is ingedrukt, start de motor
         motor_running = true;
         motor_start_time = millis();
-        remaining_motor_duration = motor_duration * 1000; // Zet de resterende tijd opnieuw
         //digitalWrite(motor_pin, HIGH);
         Serial.println("Motor gestart");
+      // zet hier nog de code voor het starten van de motor
     }
-
-    // Controleer of de motor draait
-    if (motor_running) {
-        // Controleer of er een object wordt gedetecteerd door de infraroodsensor
-        int ir_sensor_state = digitalRead(sensorButtonPin);
-        if (ir_sensor_state == LOW) {
-            // Object gedetecteerd, stop de motor
-            motor_running = false;
-            remaining_motor_duration -= (millis() - motor_start_time);
-            //digitalWrite(motor_pin, LOW);
-            Serial.print("Object gedetecteerd, motor gestopt. Resterende tijd: ");
-            Serial.print(remaining_motor_duration / 1000);
-            Serial.println(" seconden");
-        } else {
-            // Object niet gedetecteerd, controleer of de motor-duur is verstreken
-            if (millis() - motor_start_time >= remaining_motor_duration) {
-                motor_running = false;
-                //digitalWrite(motor_pin, LOW);
-                Serial.println("Motor gestopt (duur verstreken)");
-            }
-        }
-    } else {
-        // Motor is gestopt, controleer opnieuw of er een object wordt gedetecteerd
-        int ir_sensor_state = digitalRead(sensorButtonPin);
-        if (ir_sensor_state == HIGH) {
-            // Object niet gedetecteerd, hervat de motor.
-            motor_running = true;
-            motor_start_time = millis();
-            //digitalWrite(motor_pin, HIGH);
-            Serial.println("Motor hervat");
+    // controleer op object 
+    if (ir_sensor_state == LOW) {
+        // Object gedetecteerd, stop de motor
+        motor_running = false;
+        Serial.print("Object gedetecteerd, motor gestopt. Resterende tijd: ");
+        // zet hier nog de code voor het stoppen van de motor
+    }
+     // controleer of object weg is
+    if (ir_sensor_state == HIGH) {
+        // Object is weg, start de motor
+        motor_running = true;
+        remaining_motor_duration = (millis() - motor_start_time);
+        Serial.print("Object is weg, hervat motor. Resterende tijd: ");
+        
+        // als de looptijd nog niet overschreven is start de motor weer:
+        if (millis() - motor_start_time >= remaining_motor_duration) {
+        // zet hier nog de code voor het starten van de motor
+        motor_start_time = millis() - remaining_motor_duration
         }
     }
 }
