@@ -9,7 +9,7 @@ const int sensorButtonPin = 2; // Aanpassen naar het juiste pinnummer voor de se
 
 bool motor_running = false;
 unsigned long motor_start_time = 0;
-unsigned long motor_duration = 20; // Motor loopt initieel 20 seconden
+unsigned long motor_duration = 20000; // Motor loopt initieel 20 seconden
 unsigned long remaining_motor_duration = 0; // Resterende tijd van de motor
 
 // Variable to track button state
@@ -50,6 +50,7 @@ void loop() {
         motor_running = false;
         objectDetected = true;
         Serial.print("Object gedetecteerd, motor gestopt. Resterende tijd: ");
+        
         Serial.println(remaining_motor_duration);
         // zet hier nog de code voor het stoppen van de motor
     }
@@ -58,11 +59,11 @@ void loop() {
         // Object is weg, start de motor
         motor_running = true;
         objectDetected = false;
-        remaining_motor_duration = (millis() - motor_start_time);
+        remaining_motor_duration = motor_duration - ((millis() - motor_start_time));
         
         
         // als de looptijd nog niet overschreven is start de motor weer:
-        if (millis() - motor_start_time >= remaining_motor_duration) {
+        if (motor_duration <= remaining_motor_duration) {
         // zet hier nog de code voor het starten van de motor
         motor_start_time = (millis() - remaining_motor_duration);
         Serial.print("Object is weg, hervat motor. Resterende tijd: ");
