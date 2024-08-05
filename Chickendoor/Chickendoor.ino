@@ -5,15 +5,12 @@ const int IN2_PIN = 5; // the Arduino pin connected to the IN2 pin L298N.
 
 const int openButtonPin = 3; // Aanpassen naar het juiste pinnummer voor de openknop
 const int closeButtonPin = 4; // Aanpassen naar het juiste pinnummer voor de dichtknop
-const int sensorButtonPin = 2; // Aanpassen naar het juiste pinnummer voor de sensor
+const int sensorButtonPin = 2; // Aanpassen naar het juiste pinnummer voor de sensor. E18-D80NK Bruin 5v, Blue GND, Zwart signal
 
 bool motor_running = false;
 unsigned long motor_start_time = 0;
 unsigned long motor_duration = 20; // Motor loopt initieel 20 seconden
 unsigned long remaining_motor_duration = 0; // Resterende tijd van de motor
-
-// Create servo object for motor
-Servo motor;
 
 // Variable to track button state
 bool buttonPressed = false;
@@ -38,6 +35,7 @@ void setup() {
 void loop() {
     // Controleer of de knop is ingedrukt
     int button_state = digitalRead(openButtonPin);
+    int ir_sensor_state = digitalRead(sensorButtonPin);
     if (button_state == LOW) {
         // Knop is ingedrukt, start de motor
         motor_running = true;
@@ -46,24 +44,29 @@ void loop() {
         Serial.println("Motor gestart");
       // zet hier nog de code voor het starten van de motor
     }
-    // controleer op object 
-    if (ir_sensor_state == LOW) {
+    // controleer op object. LOW betekend gedetecteerd
+    if (ir_sensor_state == LOW && motor_running) {
         // Object gedetecteerd, stop de motor
         motor_running = false;
+        objectDetected = true;
         Serial.print("Object gedetecteerd, motor gestopt. Resterende tijd: ");
+        Serial.println(remaining_motor_duration);
         // zet hier nog de code voor het stoppen van de motor
     }
      // controleer of object weg is
-    if (ir_sensor_state == HIGH) {
+    if (ir_sensor_state == HIGH && objectDetected) {
         // Object is weg, start de motor
         motor_running = true;
+        objectDetected = false;
         remaining_motor_duration = (millis() - motor_start_time);
-        Serial.print("Object is weg, hervat motor. Resterende tijd: ");
+        
         
         // als de looptijd nog niet overschreven is start de motor weer:
         if (millis() - motor_start_time >= remaining_motor_duration) {
         // zet hier nog de code voor het starten van de motor
-        motor_start_time = millis() - remaining_motor_duration
+        motor_start_time = (millis() - remaining_motor_duration);
+        Serial.print("Object is weg, hervat motor. Resterende tijd: ");
+        Serial.println(remaining_motor_duration);
         }
     }
 }
