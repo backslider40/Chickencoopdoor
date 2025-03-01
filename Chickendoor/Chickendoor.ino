@@ -37,7 +37,7 @@ void loop() {
     int button_state = digitalRead(openButtonPin);
     int ir_sensor_state = digitalRead(sensorButtonPin);
     if (button_state == LOW) {
-        // Knop is ingedrukt, start de motor
+        // Knop is ingedrukt, start de motorr
         motor_running = true;
         motor_start_time = millis();
         //digitalWrite(motor_pin, HIGH);
