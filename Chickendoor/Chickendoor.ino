@@ -1,3 +1,6 @@
+// versie 0.3. Deze werkt. De teller telt op. Wanneer ik op de button klik gaat de teller op 0 en begint te tellen. Gaat op pauze zodra er een object gezien is.
+
+
 // Pinnummers voor knoppen en motor
 const int ENA_PIN = 9; // the Arduino pin connected to the EN1 pin L298N
 const int IN1_PIN = 6; // the Arduino pin connected to the IN1 pin L298N.
@@ -11,6 +14,9 @@ unsigned long timerStart = 0;
 unsigned long timerEnd = 0;
 unsigned long elapsedTime = 0;
 unsigned long motor_duration = 20000;
+int counter = 0; // Teller
+bool paused = false;
+bool startmotor = false;
 
 void setup() {
   Serial.begin(9600);
@@ -36,6 +42,17 @@ void stopTimer() {
   //Serial.print("Timer is gestopt! Verstreken tijd: " + elapsedTime + "miliseconden");
 }
 
+void incrementCounter() {
+    unsigned long currentMillis = millis();
+     static unsigned long lastMillis = 0;
+   
+    if (currentMillis - lastMillis >= 1000) { // Tel elke seconde op
+        lastMillis = currentMillis;
+        counter++;
+        Serial.println(counter);
+    }
+}
+
  void openPoortje() {
 //  digitalWrite(motor_pin, HIGH);
   Serial.print("Motor gestart");
@@ -49,10 +66,14 @@ void sluitPoortje() {
 boolean checkKip() {
   if (digitalRead(sensorButtonPin) == LOW) {
     Serial.println("Kip gedetecteerd");
-
+    Serial.println(counter);
+    // stop motor script hier.
     return true;
   } else {
     Serial.println("Geen kip");
+    incrementCounter();
+    Serial.println(counter);
+    // start motor script hier.
     return false;
   }
 }
@@ -60,23 +81,21 @@ boolean checkKip() {
 void loop (){
   int button_state = digitalRead(openButtonPin);
   checkKip(); // checkt continu of er een kip is of niet.
+  if (button_state == LOW){
+    startmotor = true;
+    counter = 0;
+  } 
+  
+  if (startmotor) {
+      paused = true;
+  } else {
+      paused = false;
+      
+  }
 
-  int ir_sensor_state = digitalRead(sensorButtonPin); // 0 en 1
-  //Serial.println(ir_sensor_state);
+  if (!paused) {
+      incrementCounter();
+      Serial.println(counter);
 
-
-  if (button_state == LOW && !checkKip()) {
-    startTimer();
-    //openPoortje(); geen motor aangesloten
-
-    while (elapsedTime < motor_duration) {
-      elapsedTime = millis() - timerStart;
-      if (checkKip() == true){
-        stopTimer();
-        Serial.println("Pauze");
-      }
-      Serial.println("Gelopen tijd is: ");
-      Serial.println(elapsedTime);
-    }
   }
 }
