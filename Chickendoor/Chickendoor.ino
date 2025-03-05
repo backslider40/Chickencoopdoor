@@ -2,42 +2,81 @@
 const int ENA_PIN = 9; // the Arduino pin connected to the EN1 pin L298N
 const int IN1_PIN = 6; // the Arduino pin connected to the IN1 pin L298N.
 const int IN2_PIN = 5; // the Arduino pin connected to the IN2 pin L298N.
-
 const int openButtonPin = 3; // Aanpassen naar het juiste pinnummer voor de openknop
 const int closeButtonPin = 4; // Aanpassen naar het juiste pinnummer voor de dichtknop
 const int sensorButtonPin = 2; // Aanpassen naar het juiste pinnummer voor de sensor. E18-D80NK Bruin 5v, Blue GND, Zwart signal
 
-bool motor_running = false;
-unsigned long motor_start_time = 0;
-unsigned long motor_duration = 20000; // Motor loopt initieel 20 seconden
-unsigned long remaining_motor_duration = 0; // Resterende tijd van de motor
+// Default waardes
+unsigned long timerStart = 0;
+unsigned long timerEnd = 0;
+unsigned long elapsedTime = 0;
+unsigned long motor_duration = 20000;
 
-// Variable to track button state
-bool buttonPressed = false;
-
-// Variable to track infrared sensor state
-bool objectDetected = false;
+//int button_state = digitalRead(openButtonPin); // Default is High
 
 void setup() {
+  Serial.begin(9600);
   pinMode(ENA_PIN, OUTPUT);
   pinMode(IN1_PIN, OUTPUT);
   pinMode(IN2_PIN, OUTPUT);
   digitalWrite(ENA_PIN, HIGH);
-
   pinMode(openButtonPin, INPUT_PULLUP); // Interne pull-up weerstand voor de vooruitknop
   pinMode(closeButtonPin, INPUT_PULLUP); // Interne pull-up weerstand voor de achteruitknop
   pinMode(sensorButtonPin, INPUT); // Interne pull-up weerstand voor de pauzeknop
-
-  Serial.begin(9600);
-  Serial.println("Motor gestopt. Druk op een knop om te starten.");
 }
 
-void loop() {
+void startTimer() {
+  timerStart = millis();
+  timerEnd = 0;
+  elapsedTime = 0;
+  Serial.println("Timer is gestart!");
+}
+
+void stopTimer() {
+  timerEnd = millis();
+  elapsedTime = timerEnd - timerStart;
+  Serial.print("Timer is gestopt! Verstreken tijd: " + elapsedTime + "miliseconden");
+}
+
+void openPoortje() {
+  digitalWrite(motor_pin, HIGH);
+  Serial.print("Motor gestart")
+}
+
+void sluitPoortje() {
+  digitalWrite(motor_pin, LOW);
+  Serial.print("Motor gestart")
+}
+
+boolean checkKip() {
+  if (digitalRead(sensorButtonPin) == LOW) {
+    Serial.println("Kip gedetecteerd");
+    return true;
+  } else {
+    Serial.println("Geen kip");
+    return false;
+  }
+}
+
+void loop (){
+  int button_state = digitalRead(openButtonPin);
+  checkKip() // checkt continu of er een kip is of niet.
+
+  if (button_state == LOW && !checkKip()) {
+    startTimer();
+    openPoortje();
+
+    while (elapsedTime < motor_duration) {
+      elapsedTime = millis() - timerStart;
+    }
+    stopTimer();
+  }
+}
+
+/*void loop() {
     // Controleer of de knop is ingedrukt
-    int button_state = digitalRead(openButtonPin);
-    int ir_sensor_state = digitalRead(sensorButtonPin);
     if (button_state == LOW) {
-        // Knop is ingedrukt, start de motorr
+        // Knop is ingedrukt, start de motor
         motor_running = true;
         motor_start_time = millis();
         //digitalWrite(motor_pin, HIGH);
@@ -70,4 +109,4 @@ void loop() {
         Serial.println(remaining_motor_duration);
         }
     }
-}
+}*/
