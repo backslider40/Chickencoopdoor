@@ -1,6 +1,6 @@
 // versie 0.3. Deze werkt. De teller telt op. Wanneer ik op de button klik gaat de teller op 0 en begint te tellen. Gaat op pauze zodra er een object gezien is.
-// versie 0.4. Script vereenvoudigd.
-// versie 0.5. Script vereenvoudigd.
+// versie 0.4 / 0.5. Script vereenvoudigd.
+// versie 0.5 werkt. Motor draait 20 seconden na indrukken. Gaat op pauze wanneer er een object gezien wordt.
 
 const int ENA_PIN = 9; // the Arduino pin connected to the EN1 pin L298N
 const int IN1_PIN = 6; // the Arduino pin connected to the IN1 pin L298N.
@@ -9,7 +9,7 @@ const int openButtonPin = 3; // Aanpassen naar het juiste pinnummer voor de open
 const int sensorButtonPin = 2; // Aanpassen naar het juiste pinnummer voor de sensor
 
 int counter = 0; // Teller
-bool paused = false;
+bool startmotor = false;
 
 void setup() {
   Serial.begin(9600);
@@ -35,19 +35,21 @@ void incrementCounter() {
 void loop() {
   if (digitalRead(openButtonPin) == LOW) {
     counter = 0;
-    // paused = true;
+    startmotor = true;
   } 
   
-  if (digitalRead(sensorButtonPin) == LOW) {
-    Serial.println("Kip gedetecteerd, teller gepauzeerd");
-    // paused = true;
+  if (startmotor){
+    if (digitalRead(sensorButtonPin) == LOW) {
+      Serial.println("Kip gedetecteerd, teller gepauzeerd");
   } else if (digitalRead(openButtonPin) == HIGH) {
-    Serial.println("Geen kip gedetecteerd");
-    incrementCounter();
-    Serial.println(counter);
-    // paused = false;
-    if (counter == 20) {
-      // paused = true;
+      Serial.println("Geen kip gedetecteerd");
+      incrementCounter();
+      Serial.println(counter);
+      if (counter >= 20) {
+        Serial.println("20 sec gedraaid");
+        startmotor = false;
+        counter = 0;
+      }
     }
   }
   
