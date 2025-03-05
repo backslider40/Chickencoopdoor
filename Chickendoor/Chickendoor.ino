@@ -48,10 +48,11 @@ void sluitPoortje() {
 
 boolean checkKip() {
   if (digitalRead(sensorButtonPin) == LOW) {
-    //Serial.println("Kip gedetecteerd");
+    Serial.println("Kip gedetecteerd");
+
     return true;
   } else {
-    //Serial.println("Geen kip");
+    Serial.println("Geen kip");
     return false;
   }
 }
@@ -72,9 +73,10 @@ void loop (){
       elapsedTime = millis() - timerStart;
       if (checkKip() == true){
         stopTimer();
+        Serial.println("Pauze");
       }
+      Serial.println("Gelopen tijd is: ");
       Serial.println(elapsedTime);
     }
-    stopTimer();
   }
 }
