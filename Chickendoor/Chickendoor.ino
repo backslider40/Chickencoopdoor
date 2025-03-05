@@ -2,7 +2,8 @@
 // versie 0.4 / 0.5. Script vereenvoudigd.
 // versie 0.5 werkt. Motor draait 20 seconden na indrukken. Gaat op pauze wanneer er een object gezien wordt.
 // versie 0.6. Motor dicht / open toggle ingebouwd
-// ToDo: script opsplitsen in een openbutton en close button.
+// versie 07. Toggle eruit gehaald en script opgesplitst in een openbutton en closebutton.
+// Todo: naamconsistentie, duur van het draaien van de motor bovenin definieren, snelheid van de motor als variable meegeven, bij het opengaan hoeft de sensor niet
 
 
 // zie https://arduinogetstarted.com/tutorials/arduino-actuator
@@ -10,11 +11,12 @@ const int ENA_PIN = 9; // the Arduino pin connected to the EN1 pin L298N
 const int IN1_PIN = 6; // the Arduino pin connected to the IN1 pin L298N.
 const int IN2_PIN = 5; // the Arduino pin connected to the IN2 pin L298N.
 const int openButtonPin = 3; // Aanpassen naar het juiste pinnummer voor de openknop
+const int closeButtonPin = 4; // Aanpassen naar het juiste pinnummer voor de openknop
 const int sensorButtonPin = 2; // Aanpassen naar het juiste pinnummer voor de sensor
 
 int counter = 0; // Teller
-bool startmotor = false;
-bool motorDirection = false;  // Motor draairichting (false = voorwaarts, true = achteruit)
+bool startmotoropen = false;
+bool startmotordicht = false;
 
 void setup() {
   Serial.begin(9600);
@@ -23,6 +25,7 @@ void setup() {
   pinMode(IN2_PIN, OUTPUT);
   digitalWrite(ENA_PIN, HIGH);
   pinMode(openButtonPin, INPUT_PULLUP);
+  pinMode(closeButtonPin, INPUT_PULLUP);
   pinMode(sensorButtonPin, INPUT);
 }
 
@@ -37,36 +40,68 @@ void incrementCounter() {
     }
 }
 
+void motoruit() {
+  digitalWrite(ENA_PIN, HIGH); // Motor uit
+  digitalWrite(IN1_PIN, LOW);
+  digitalWrite(IN2_PIN, LOW);
+}
+
+void motoropen() {
+  digitalWrite(ENA_PIN, LOW); // Motor aan
+  digitalWrite(IN1_PIN, HIGH);
+  digitalWrite(IN2_PIN, LOW);
+}
+
+void motordicht() {
+  digitalWrite(ENA_PIN, LOW); // Motor aan
+  digitalWrite(IN1_PIN, LOW);
+  digitalWrite(IN2_PIN, HIGH);
+}
+
 void loop() {
+  // wanneer er op de open button geklikt wordt.
   if (digitalRead(openButtonPin) == LOW) {
     counter = 0;
-    startmotor = true;
+    startmotoropen = true;
+    startmotordicht = false;
   } 
-  
-  if (startmotor){
+  // wanneer er op de close button geklikt wordt.
+  if (digitalRead(closeButtonPin) == LOW) {
+    counter = 0;
+    startmotordicht = true;
+    startmotoropen = false;
+  } 
+
+  if (startmotoropen){
     if (digitalRead(sensorButtonPin) == LOW) {
-      Serial.println("Kip gedetecteerd, teller gepauzeerd");
-      digitalWrite(IN1_PIN, LOW);  // Motor uit
-      digitalWrite(IN2_PIN, LOW);  // motor uit
+      Serial.println("Kip gedetecteerd, teller gepauzeerd, motor uit");
+      motoruit();
   } else if (digitalRead(openButtonPin) == HIGH) {
       Serial.println("Geen kip gedetecteerd");
       incrementCounter();
       Serial.println(counter);
-      if (motorDirection) {
-        digitalWrite(IN1_PIN, LOW);  // Draai motor achteruit
-        digitalWrite(IN2_PIN, HIGH);
-        Serial.println("Motor dicht stand");
-      } else {
-        digitalWrite(IN1_PIN, HIGH); // Draai motor vooruit
-        digitalWrite(IN2_PIN, LOW);
-        Serial.println("Motor open stand");
+      motoropen();
+      if (counter >= 20) {
+        Serial.println("20 seconden gedraaid. Hok is open!");
+        startmotoropen = false;
+        counter = 0;
+      }
+    }
   }
 
+  if (startmotordicht){
+    if (digitalRead(sensorButtonPin) == LOW) {
+      Serial.println("Kip gedetecteerd, teller gepauzeerd, motor uit");
+      motoruit();
+  } else if (digitalRead(closeButtonPin) == HIGH) {
+      Serial.println("Geen kip gedetecteerd");
+      incrementCounter();
+      Serial.println(counter);
+      motordicht();
       if (counter >= 20) {
-        Serial.println("20 sec gedraaid");
-        startmotor = false;
+        Serial.println("20 seconden gedraaid. Hok is dicht!");
+        startmotordicht = false;
         counter = 0;
-        motorDirection = !motorDirection;
       }
     }
   }
