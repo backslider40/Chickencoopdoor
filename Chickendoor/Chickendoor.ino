@@ -64,12 +64,15 @@ void loop (){
 
   if (button_state == LOW && !checkKip()) {
     startTimer();
-    openPoortje();
+    //openPoortje(); geen motor aangesloten
 
     while (elapsedTime < motor_duration) {
       elapsedTime = millis() - timerStart;
+      Serial.println(elapsedTime)
     }
     stopTimer();
+  } else {
+    Serial.println("Er is een kip")
   }
 }
 
