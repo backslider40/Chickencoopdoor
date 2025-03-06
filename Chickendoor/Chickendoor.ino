@@ -1,9 +1,5 @@
-// versie 0.3. Deze werkt. De teller telt op. Wanneer ik op de button klik gaat de teller op 0 en begint te tellen. Gaat op pauze zodra er een object gezien is.
-// versie 0.4 / 0.5. Script vereenvoudigd.
-// versie 0.5 werkt. Motor draait 20 seconden na indrukken. Gaat op pauze wanneer er een object gezien wordt.
-// versie 0.6. Motor dicht / open toggle ingebouwd
-// versie 07. Toggle eruit gehaald en script opgesplitst in een openbutton en closebutton.
-// Todo: naamconsistentie, duur van het draaien van de motor bovenin definieren, snelheid van de motor als variable meegeven, bij het opengaan hoeft de sensor niet
+// versie 0.8. Naamconsistentie, duur van het draaien van de motor in variabele, 
+// ToDo: snelheid van de motor meegeven, bij het opengaan hoeft de sensor niet
 
 
 // zie https://arduinogetstarted.com/tutorials/arduino-actuator
@@ -15,8 +11,9 @@ const int closeButtonPin = 4; // Aanpassen naar het juiste pinnummer voor de ope
 const int sensorButtonPin = 2; // Aanpassen naar het juiste pinnummer voor de sensor
 
 int counter = 0; // Teller
+unsigned long motor_duration = 20; // Motor loopt initieel 20 seconden
 bool startmotoropen = false;
-bool startmotordicht = false;
+bool startmotorclose = false;
 
 void setup() {
   Serial.begin(9600);
@@ -40,7 +37,7 @@ void incrementCounter() {
     }
 }
 
-void motoruit() {
+void motoroff() {
   digitalWrite(ENA_PIN, HIGH); // Motor uit
   digitalWrite(IN1_PIN, LOW);
   digitalWrite(IN2_PIN, LOW);
@@ -52,7 +49,7 @@ void motoropen() {
   digitalWrite(IN2_PIN, LOW);
 }
 
-void motordicht() {
+void motorclose() {
   digitalWrite(ENA_PIN, LOW); // Motor aan
   digitalWrite(IN1_PIN, LOW);
   digitalWrite(IN2_PIN, HIGH);
@@ -63,44 +60,46 @@ void loop() {
   if (digitalRead(openButtonPin) == LOW) {
     counter = 0;
     startmotoropen = true;
-    startmotordicht = false;
+    startmotorclose = false;
+    Serial.println("Hok gaat open!");
   } 
   // wanneer er op de close button geklikt wordt.
   if (digitalRead(closeButtonPin) == LOW) {
     counter = 0;
-    startmotordicht = true;
+    startmotorclose = true;
     startmotoropen = false;
+    Serial.println("Hok gaat dicht!");
   } 
 
   if (startmotoropen){
     if (digitalRead(sensorButtonPin) == LOW) {
       Serial.println("Kip gedetecteerd, teller gepauzeerd, motor uit");
-      motoruit();
+      motoroff();
   } else if (digitalRead(openButtonPin) == HIGH) {
-      Serial.println("Geen kip gedetecteerd");
+      Serial.println("Geen kip gedetecteerd, hok gaat open!");
       incrementCounter();
       Serial.println(counter);
       motoropen();
-      if (counter >= 20) {
-        Serial.println("20 seconden gedraaid. Hok is open!");
+      if (counter >= motor_duration) {
+        Serial.println(String(motor_duration) + " seconden gedraaid. Hok is open!");
         startmotoropen = false;
         counter = 0;
       }
     }
   }
 
-  if (startmotordicht){
+  if (startmotorclose){
     if (digitalRead(sensorButtonPin) == LOW) {
       Serial.println("Kip gedetecteerd, teller gepauzeerd, motor uit");
-      motoruit();
+      motoroff();
   } else if (digitalRead(closeButtonPin) == HIGH) {
-      Serial.println("Geen kip gedetecteerd");
+      Serial.println("Geen kip gedetecteerd, hok gaat dicht!");
       incrementCounter();
       Serial.println(counter);
-      motordicht();
-      if (counter >= 20) {
-        Serial.println("20 seconden gedraaid. Hok is dicht!");
-        startmotordicht = false;
+      motorclose();
+      if (counter >= motor_duration) {
+        Serial.println(String(motor_duration) + " seconden gedraaid. Hok is dicht!");
+        startmotorclose = false;
         counter = 0;
       }
     }
