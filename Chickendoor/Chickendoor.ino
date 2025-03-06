@@ -1,6 +1,6 @@
 // versie 0.8. Naamconsistentie, duur van het draaien van de motor in variabele, 
-// ToDo: snelheid van de motor meegeven, bij het opengaan hoeft de sensor niet
-
+// versie 0.81 else if veranderd naar else
+// versie 0.82 sensor check uit de startmotoropen gehaald.
 
 // zie https://arduinogetstarted.com/tutorials/arduino-actuator
 const int ENA_PIN = 9; // the Arduino pin connected to the EN1 pin L298N
@@ -72,11 +72,11 @@ void loop() {
   } 
 
   if (startmotoropen){
-    if (digitalRead(sensorButtonPin) == LOW) {
-      Serial.println("Kip gedetecteerd, teller gepauzeerd, motor uit");
-      motoroff();
-  } else if (digitalRead(openButtonPin) == HIGH) {
-      Serial.println("Geen kip gedetecteerd, hok gaat open!");
+  //  if (digitalRead(sensorButtonPin) == LOW) {
+  //    Serial.println("Kip gedetecteerd, teller gepauzeerd, motor uit");
+  //    motoroff();
+//  } else {
+      Serial.println("Hok gaat open!");
       incrementCounter();
       Serial.println(counter);
       motoropen();
@@ -85,14 +85,14 @@ void loop() {
         startmotoropen = false;
         counter = 0;
       }
-    }
+//    }
   }
 
   if (startmotorclose){
     if (digitalRead(sensorButtonPin) == LOW) {
       Serial.println("Kip gedetecteerd, teller gepauzeerd, motor uit");
       motoroff();
-  } else if (digitalRead(closeButtonPin) == HIGH) {
+  } else {
       Serial.println("Geen kip gedetecteerd, hok gaat dicht!");
       incrementCounter();
       Serial.println(counter);
