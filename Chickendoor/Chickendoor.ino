@@ -1,6 +1,10 @@
-// versie 0.8. Naamconsistentie, duur van het draaien van de motor in variabele, 
-// versie 0.81 else if veranderd naar else
-// versie 0.82 sensor check uit de startmotoropen gehaald.
+// versie 1.0. 
+// 6-3-2025
+// Gemaakt voor arduino nano. Board: Arduino Nano
+// Pin 2 voor de sensor 
+// Pin 3 voor de open button
+// Pin 4 voor de close button
+
 
 // zie https://arduinogetstarted.com/tutorials/arduino-actuator
 const int ENA_PIN = 9; // the Arduino pin connected to the EN1 pin L298N
@@ -24,6 +28,7 @@ void setup() {
   pinMode(openButtonPin, INPUT_PULLUP);
   pinMode(closeButtonPin, INPUT_PULLUP);
   pinMode(sensorButtonPin, INPUT);
+  Serial.println("Waiting for command ");
 }
 
 void incrementCounter() {
@@ -56,15 +61,19 @@ void motorclose() {
 }
 
 void loop() {
+   
+  String inputcommand = Serial.readString();
+  Serial.print(inputcommand);
+
   // wanneer er op de open button geklikt wordt.
-  if (digitalRead(openButtonPin) == LOW) {
+  if (inputcommand == String("DoorOpen\n")) {
     counter = 0;
     startmotoropen = true;
     startmotorclose = false;
     Serial.println("Hok gaat open!");
   } 
   // wanneer er op de close button geklikt wordt.
-  if (digitalRead(closeButtonPin) == LOW) {
+  if (inputcommand == String("DoorClose\n")) {
     counter = 0;
     startmotorclose = true;
     startmotoropen = false;
@@ -72,7 +81,8 @@ void loop() {
   } 
 
   if (startmotoropen){
-  //  if (digitalRead(sensorButtonPin) == LOW) {
+//  Bij het open gaan hoeft er niet gecontroleerd worden of er een kip in de deuropening zit.
+//  if (digitalRead(sensorButtonPin) == LOW) {
   //    Serial.println("Kip gedetecteerd, teller gepauzeerd, motor uit");
   //    motoroff();
 //  } else {
@@ -84,12 +94,15 @@ void loop() {
         Serial.println(String(motor_duration) + " seconden gedraaid. Hok is open!");
         startmotoropen = false;
         counter = 0;
+        motoroff();
+        Serial.println("Waiting for command ");
       }
 //    }
   }
 
   if (startmotorclose){
-    if (digitalRead(sensorButtonPin) == LOW) {
+    // LOW betekend iets gedetecteerd.
+    if (digitalRead(sensorButtonPin) == HIGH) {
       Serial.println("Kip gedetecteerd, teller gepauzeerd, motor uit");
       motoroff();
   } else {
@@ -101,6 +114,8 @@ void loop() {
         Serial.println(String(motor_duration) + " seconden gedraaid. Hok is dicht!");
         startmotorclose = false;
         counter = 0;
+        motoroff();
+        Serial.println("Waiting for command ");
       }
     }
   }
